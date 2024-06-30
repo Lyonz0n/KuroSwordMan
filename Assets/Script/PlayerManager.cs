@@ -103,7 +103,7 @@ public class PlayerManager : MonoBehaviour
         isDashing = false;
     }
 
-    /*private void FlipSprite(float horizontalMovement)
+    private void FlipSprite(float horizontalMovement)
     {
         Vector3 localScale = playerTransform.localScale;
 
@@ -117,7 +117,7 @@ public class PlayerManager : MonoBehaviour
         }
 
         playerTransform.localScale = localScale;
-    }*/
+    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
