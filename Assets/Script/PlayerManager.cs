@@ -23,12 +23,12 @@ public class PlayerManager : MonoBehaviour
     private bool isGrounded = true; // Assurez-vous de mettre à jour cette variable en fonction de votre détection de sol
 
     private bool isDashing;
-    private Transform playerParent;
+    private Transform playerTransform;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        playerParent = transform.parent; // Assurez-vous que le script est attaché à l'enfant du parent
+        playerTransform = transform; // Assurez-vous que le script est attaché au joueur
     }
 
     private void Update()
@@ -37,7 +37,7 @@ public class PlayerManager : MonoBehaviour
 
         if (horizontalInput != 0)
         {
-            FlipSprite(horizontalInput);
+           // FlipSprite(horizontalInput);
             animator.SetBool("isRunning", true); // Activer l'animation de course
         }
         else
@@ -103,17 +103,21 @@ public class PlayerManager : MonoBehaviour
         isDashing = false;
     }
 
-    private void FlipSprite(float horizontalMovement)
+    /*private void FlipSprite(float horizontalMovement)
     {
+        Vector3 localScale = playerTransform.localScale;
+
         if (horizontalMovement < 0)
         {
-            playerParent.localScale = new Vector3(-1, 1, 1); // Flip gauche
+            localScale.x = -Mathf.Abs(localScale.x); // Flip gauche
         }
         else if (horizontalMovement > 0)
         {
-            playerParent.localScale = new Vector3(1, 1, 1); // Flip droite
+            localScale.x = Mathf.Abs(localScale.x); // Flip droite
         }
-    }
+
+        playerTransform.localScale = localScale;
+    }*/
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
