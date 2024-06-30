@@ -107,11 +107,11 @@ public class PlayerManager : MonoBehaviour
     {
         if (horizontalMovement < 0)
         {
-            playerParent.localScale = new Vector3(1, 1, 1); // Flip gauche
+            playerParent.localScale = new Vector3(-1, 1, 1); // Flip gauche
         }
         else if (horizontalMovement > 0)
         {
-            playerParent.localScale = new Vector3(-1, 1, 1); // Flip droite
+            playerParent.localScale = new Vector3(1, 1, 1); // Flip droite
         }
     }
 
