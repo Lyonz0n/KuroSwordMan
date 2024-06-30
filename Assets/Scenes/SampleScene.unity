@@ -1148,7 +1148,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 0}
-  speed: 5
+  speed: 6
   jumpForce: 10
   dashSpeed: 20
   dashDuration: 0.2
