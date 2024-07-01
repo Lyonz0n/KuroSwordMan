@@ -878,7 +878,7 @@ GameObject:
   - component: {fileID: 1107442664}
   - component: {fileID: 1107442666}
   - component: {fileID: 1107442665}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Square
   m_TagString: Ground
   m_Icon: {fileID: 0}
@@ -1209,7 +1209,7 @@ GameObject:
   - component: {fileID: 1892934371}
   - component: {fileID: 1892934370}
   m_Layer: 0
-  m_Name: Square
+  m_Name: mur
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1484,6 +1484,14 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6955097730498090309, guid: 8558c2182d308f642a7965183b620779, type: 3}
+      propertyPath: wallCheck
+      value: 
+      objectReference: {fileID: 1892934372}
+    - target: {fileID: 6955097730498090309, guid: 8558c2182d308f642a7965183b620779, type: 3}
+      propertyPath: groundCheck
+      value: 
+      objectReference: {fileID: 1058355558}
+    - target: {fileID: 6955097730498090309, guid: 8558c2182d308f642a7965183b620779, type: 3}
       propertyPath: groundingForce
       value: -0.1
       objectReference: {fileID: 0}
@@ -1494,6 +1502,10 @@ PrefabInstance:
     - target: {fileID: 6955097730498090309, guid: 8558c2182d308f642a7965183b620779, type: 3}
       propertyPath: wallLayer.m_Bits
       value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 6955097730498090309, guid: 8558c2182d308f642a7965183b620779, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
