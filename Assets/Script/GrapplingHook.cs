@@ -31,7 +31,7 @@ public class GrapplingHook : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            RaycastHit2D hit = Physics2D.Raycast(
+                RaycastHit2D hit = Physics2D.Raycast(
                 origin: Camera.main.ScreenToWorldPoint(Input.mousePosition),
                 direction: Vector2.zero,
                 distance: Mathf.Infinity,
