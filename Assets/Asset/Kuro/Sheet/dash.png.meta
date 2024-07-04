@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 479188acb05db95439c2f9cd33fbab95
+guid: 98a9bb03c84ea004e8b79523a9d76f61
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -123,33 +123,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: idle-player-Sheet_0
+      name: dash_0
       rect:
         serializedVersion: 2
         x: 8
         y: 0
         width: 17
-        height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ce183aafaf4a82d49acd04ea77e84809
-      internalID: -1550724276
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: idle-player-Sheet_1
-      rect:
-        serializedVersion: 2
-        x: 40
-        y: 0
-        width: 17
         height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -158,40 +137,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 60d72b623e770094488a52b10b0c9b81
-      internalID: -667275687
+      spriteID: 3c734acf928814a4ca71eb5202a91f03
+      internalID: -2052726862
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: idle-player-Sheet_2
+      name: dash_1
       rect:
         serializedVersion: 2
-        x: 72
-        y: 0
-        width: 17
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 9edd293075893ff40b71608f4ba786ad
-      internalID: 839940886
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: idle-player-Sheet_3
-      rect:
-        serializedVersion: 2
-        x: 104
-        y: 0
-        width: 17
+        x: 35
+        y: 1
+        width: 26
         height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -200,8 +158,50 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e1259f22a89337942818ec927d279d6b
-      internalID: 1448371793
+      spriteID: 7e9f621a8a11c3645a7c232dc618a500
+      internalID: -1706440634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dash_2
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 2
+        width: 26
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 63dd9fabb4ce2324d8730888864e34ef
+      internalID: -832874460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dash_3
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 1
+        width: 27
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1864fa72eb61fd40bdf9d3197601a6b
+      internalID: -1690960038
       vertices: []
       indices: 
       edges: []
@@ -217,10 +217,10 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      idle-player-Sheet_0: -1550724276
-      idle-player-Sheet_1: -667275687
-      idle-player-Sheet_2: 839940886
-      idle-player-Sheet_3: 1448371793
+      dash_0: -2052726862
+      dash_1: -1706440634
+      dash_2: -832874460
+      dash_3: -1690960038
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
