@@ -20,10 +20,14 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private Vector2 wallJumpDirection = new Vector2(1, 1); // Direction du wall jump
 
     [Header("Gravity Settings")]
-    [SerializeField] private float groundingForce = -20f; // Force appliquée lorsque le personnage est au sol
+    [SerializeField] private float defaultGravityScale = 1f;
     [SerializeField] private float fallAcceleration = 20f; // Accélération de la chute
     [SerializeField] private float maxFallSpeed = 40f; // Vitesse de chute maximale
     [SerializeField] private float jumpEndEarlyGravityModifier = 2f; // Modificateur de gravité lorsque le saut est terminé prématurément
+
+    [Header("Assists")]
+    [SerializeField] private float coyoteTime = 0.2f; // Période de grâce après avoir quitté le sol
+    [SerializeField] private float jumpBufferTime = 0.2f; // Période de buffer pour les inputs de saut
 
     public Rigidbody2D rb;
     public LayerMask wallLayer; // Masque de couche pour détecter les murs
@@ -36,6 +40,10 @@ public class PlayerManager : MonoBehaviour
     private bool isDashing;
     private bool endedJumpEarly = false;
     private Transform playerTransform;
+
+    private float lastGroundedTime; // Temps écoulé depuis que le joueur a quitté le sol
+    private float lastJumpTime; // Temps écoulé depuis que le joueur a appuyé sur le bouton de saut
+    private bool gravityInverted = false; // État de la gravité
 
     private void Awake()
     {
@@ -60,6 +68,16 @@ public class PlayerManager : MonoBehaviour
 
         // Mettre à jour l'état de saut dans l'Animator
         animator.SetBool("isJumping", !isGrounded);
+
+        // Décrémenter les timers de coyote time et de jump buffer
+        lastGroundedTime -= Time.deltaTime;
+        lastJumpTime -= Time.deltaTime;
+
+        // Vérifier les conditions pour sauter
+        if (CanJump() && lastJumpTime > 0)
+        {
+            Jump();
+        }
     }
 
     private void FixedUpdate()
@@ -98,19 +116,15 @@ public class PlayerManager : MonoBehaviour
     {
         if (context.started)
         {
-            if (isGrounded)
+            lastJumpTime = jumpBufferTime;
+
+            if (CanJump())
             {
-                rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-                isGrounded = false; // Le personnage n'est plus au sol après avoir sauté
-                endedJumpEarly = false;
+                Jump();
             }
             else if (isTouchingWall)
             {
-                // Appliquer une force pour le wall jump
-                Vector2 wallJumpVelocity = new Vector2(wallJumpDirection.x * wallJumpForce * -Mathf.Sign(movementInput.x), wallJumpDirection.y * wallJumpForce);
-                rb.velocity = new Vector2(wallJumpVelocity.x, 0); // Annuler la vélocité verticale actuelle
-                rb.AddForce(wallJumpVelocity, ForceMode2D.Impulse);
-                endedJumpEarly = false;
+                WallJump();
             }
         }
         else if (context.canceled && rb.velocity.y > 0)
@@ -119,10 +133,42 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void OnInvertGravity(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            InvertGravity();
+        }
+    }
+
+    private void Jump()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce * (gravityInverted ? -1 : 1));
+        isGrounded = false; // Le personnage n'est plus au sol après avoir sauté
+        endedJumpEarly = false;
+        lastJumpTime = 0;
+        lastGroundedTime = 0;
+        isJumping = true; // Mettez à jour l'état de saut
+    }
+
+    private void WallJump()
+    {
+        // Appliquer une force pour le wall jump
+        Vector2 wallJumpVelocity = new Vector2(wallJumpDirection.x * wallJumpForce * -Mathf.Sign(movementInput.x), wallJumpDirection.y * wallJumpForce * (gravityInverted ? -1 : 1));
+        rb.velocity = new Vector2(wallJumpVelocity.x, 0); // Annuler la vélocité verticale actuelle
+        rb.AddForce(wallJumpVelocity, ForceMode2D.Impulse);
+        endedJumpEarly = false;
+        lastJumpTime = 0;
+        lastGroundedTime = 0;
+    }
+
     private IEnumerator Dash()
     {
         isDashing = true;
         Vector2 dashDirection = movementInput.normalized;
+
+        // Activer l'animation de dash
+        animator.SetTrigger("Dash");
 
         // Appliquer une vélocité constante pour le dash
         rb.velocity = dashDirection * dashSpeed;
@@ -153,7 +199,7 @@ public class PlayerManager : MonoBehaviour
     {
         if (isGrounded && rb.velocity.y <= 0f)
         {
-            rb.velocity = new Vector2(rb.velocity.x, groundingForce);
+            rb.velocity = new Vector2(rb.velocity.x, 0);
         }
         else
         {
@@ -162,7 +208,7 @@ public class PlayerManager : MonoBehaviour
             {
                 inAirGravity *= jumpEndEarlyGravityModifier;
             }
-            rb.velocity = new Vector2(rb.velocity.x, Mathf.MoveTowards(rb.velocity.y, -maxFallSpeed, inAirGravity * Time.fixedDeltaTime));
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.MoveTowards(rb.velocity.y, -maxFallSpeed * (gravityInverted ? -1 : 1), inAirGravity * Time.fixedDeltaTime));
         }
     }
 
@@ -194,6 +240,40 @@ public class PlayerManager : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+            lastGroundedTime = coyoteTime; // Réinitialiser le coyote time lorsqu'on touche le sol
+            isJumping = false; // Réinitialiser l'état de saut lorsqu'on touche le sol
         }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        // Vérifiez si le personnage quitte le sol
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
+        }
+    }
+
+    private bool CanJump()
+    {
+        return (lastGroundedTime > 0 || isGrounded) && !isJumping;
+    }
+
+    private void InvertGravity()
+    {
+        gravityInverted = !gravityInverted;
+        rb.gravityScale = gravityInverted ? -defaultGravityScale : defaultGravityScale;
+        Vector3 localScale = playerTransform.localScale;
+        localScale.y *= -1; // Inverse verticalement le personnage
+        playerTransform.localScale = localScale;
+    }
+
+    public void SetGravityScale(float newGravityScale)
+    {
+        rb.gravityScale = newGravityScale * (gravityInverted ? -1 : 1);
+    }
+    public void ResetGravityScale()
+    {
+        SetGravityScale(defaultGravityScale);
     }
 }
