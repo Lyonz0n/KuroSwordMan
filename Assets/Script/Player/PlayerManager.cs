@@ -6,6 +6,10 @@ public class PlayerManager : MonoBehaviour
 {
     [Header("Animation Settings")]
     [SerializeField] private Animator animator; // Référence à l'Animator
+    [Header("Sprites")]
+    [SerializeField] private SpriteRenderer spriteRenderer; // Référence au SpriteRenderer
+    [SerializeField] private Sprite normalSprite; // Sprite normal
+    [SerializeField] private Sprite slideWallSprite; // Sprite pour le wall slide
 
     [Header("Movement Setting")]
     [SerializeField] private float speed = 8f;
@@ -29,10 +33,15 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private float jumpBufferTime = 0.2f; // Période de buffer pour les inputs de saut
 
     public Rigidbody2D rb;
-    public LayerMask wallLayer; // Masque de couche pour détecter les murs
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private Transform wallCheck;
 
+    [Header("GroundCheck")]
+    [SerializeField] private Transform groundCheck;
+    public Vector2 groundCheckSize = new Vector2(0.49f, 0.03f);
+
+    [Header("WallCheck")]
+    [SerializeField] private Transform wallCheck;
+    public LayerMask wallLayer; // Masque de couche pour détecter les murs
+    public Vector2 wallCheckSize = new Vector2(0.03f, 0.49f);
     private Vector2 movementInput;
     private Vector2 frameVelocity;
     private bool isJumping = false;
@@ -80,6 +89,15 @@ public class PlayerManager : MonoBehaviour
         // Décrémenter les timers de coyote time et de jump buffer
         lastGroundedTime -= Time.deltaTime;
         lastJumpTime -= Time.deltaTime;
+
+        if (isWallSliding)
+        {
+            spriteRenderer.sprite = slideWallSprite;
+        }
+        else
+        {
+            spriteRenderer.sprite = normalSprite;
+        }
 
         // Vérifier les conditions pour sauter
         if (CanJump() && lastJumpTime > 0)
@@ -284,10 +302,10 @@ public class PlayerManager : MonoBehaviour
     private void CheckWallContact()
     {
         // Raycast pour détecter les murs à gauche et à droite
-        RaycastHit2D hitLeft = Physics2D.Raycast(wallCheck.position, Vector2.left, 0.2f, wallLayer);
-        RaycastHit2D hitRight = Physics2D.Raycast(wallCheck.position, Vector2.right, 0.2f, wallLayer);
+        Collider2D hitLeft = Physics2D.OverlapBox(wallCheck.position, wallCheckSize, 0f, wallLayer);
+        Collider2D hitRight = Physics2D.OverlapBox(wallCheck.position, wallCheckSize, 0f, wallLayer);
 
-        isTouchingWall = hitLeft.collider != null || hitRight.collider != null;
+        isTouchingWall = hitLeft != null || hitRight != null;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -299,6 +317,11 @@ public class PlayerManager : MonoBehaviour
             lastGroundedTime = coyoteTime; // Réinitialiser le coyote time lorsqu'on touche le sol
             isJumping = false; // Réinitialiser l'état de saut lorsqu'on touche le sol
         }
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            isTouchingWall = true;
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -307,6 +330,11 @@ public class PlayerManager : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
+        }
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            isTouchingWall = false;
         }
     }
 
@@ -333,5 +361,14 @@ public class PlayerManager : MonoBehaviour
         SetGravityScale(defaultGravityScale);
     }
 
-   
+    private void OnDrawGizmosSelected()
+    {
+        //Ground check visual
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(groundCheck.position, groundCheckSize);
+        //Wall check visual
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(wallCheck.position, wallCheckSize);
+    }
+
 }
