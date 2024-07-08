@@ -894,7 +894,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 1
+  field of view: 2
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -927,11 +927,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1062861079}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &534951793 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7056631313893455266, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-  m_PrefabInstance: {fileID: 3994234906957217815}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &599883726
 GameObject:
   m_ObjectHideFlags: 0
@@ -2262,9 +2257,10 @@ MonoBehaviour:
   lineRenderer: {fileID: 1062861088}
   grappleLayer:
     serializedVersion: 2
-    m_Bits: 64
-  firePoint: {fileID: 1232939381}
-  grappleAnchorPrefab: {fileID: 534951793}
+    m_Bits: 72
+  firePoint: {fileID: 1110262772}
+  grappleAnchorPrefab: {fileID: 7056631313893455266, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
+  maxGrappleDistance: 10
 --- !u!120 &1062861088
 LineRenderer:
   serializedVersion: 2
@@ -2358,8 +2354,8 @@ LineRenderer:
       m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    numCornerVertices: 0
-    numCapVertices: 0
+    numCornerVertices: 1
+    numCapVertices: 10
     alignment: 0
     textureMode: 0
     textureScale: {x: 1, y: 1}
@@ -2374,8 +2370,8 @@ SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 4794743984948523252, guid: 8558c2182d308f642a7965183b620779, type: 3}
   m_PrefabInstance: {fileID: 4828268927803823652}
   m_PrefabAsset: {fileID: 0}
---- !u!232 &1062861090
-DistanceJoint2D:
+--- !u!231 &1062861090
+SpringJoint2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2393,7 +2389,8 @@ DistanceJoint2D:
   m_ConnectedAnchor: {x: 0, y: 0}
   m_AutoConfigureDistance: 1
   m_Distance: 4.9713354
-  m_MaxDistanceOnly: 0
+  m_DampingRatio: 1
+  m_Frequency: 1
 --- !u!1 &1107442663
 GameObject:
   m_ObjectHideFlags: 0
@@ -2524,7 +2521,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &1232939380
+--- !u!1 &1110262771
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2532,24 +2529,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1232939381}
+  - component: {fileID: 1110262772}
   m_Layer: 0
-  m_Name: FirePoint
+  m_Name: GunPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1232939381
+--- !u!4 &1110262772
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1232939380}
+  m_GameObject: {fileID: 1110262771}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.1218, y: 0.128, z: 0}
+  m_LocalPosition: {x: 0.0818, y: -0.0569, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3008,63 +3005,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1001 &3994234906957217815
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1320757083767622132, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7056631313893455266, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
-      propertyPath: m_Name
-      value: slideWall
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 985fe9f6baad4714882b4b4ee52b3764, type: 3}
 --- !u!1001 &4828268927803823652
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3255,7 +3195,7 @@ PrefabInstance:
       addedObject: {fileID: 1298544524}
     - targetCorrespondingSourceObject: {fileID: 1236179236461871809, guid: 8558c2182d308f642a7965183b620779, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1232939381}
+      addedObject: {fileID: 1110262772}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5195116930771852600, guid: 8558c2182d308f642a7965183b620779, type: 3}
       insertIndex: 3
@@ -3287,4 +3227,3 @@ SceneRoots:
   - {fileID: 202662642}
   - {fileID: 398200355}
   - {fileID: 338452343}
-  - {fileID: 3994234906957217815}

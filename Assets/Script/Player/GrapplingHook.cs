@@ -7,6 +7,7 @@ public class GrapplingHook : MonoBehaviour
     public LayerMask grappleLayer;
     public Transform firePoint;
     public GameObject grappleAnchorPrefab;
+    public float maxGrappleDistance = 10f; // Augmenter la portée du grappin
 
     private DistanceJoint2D distanceJoint;
     private Rigidbody2D rb;
@@ -20,6 +21,7 @@ public class GrapplingHook : MonoBehaviour
         distanceJoint = gameObject.AddComponent<DistanceJoint2D>();
         distanceJoint.enabled = false;
         distanceJoint.autoConfigureDistance = false;
+        distanceJoint.enableCollision = true; // Activer les collisions pour le DistanceJoint2D
     }
 
     public void OnGrapple(InputAction.CallbackContext context)
@@ -38,7 +40,7 @@ public class GrapplingHook : MonoBehaviour
     {
         if (context.started && isGrappling)
         {
-            distanceJoint.distance -= 1f;
+            distanceJoint.distance = Mathf.Max(distanceJoint.distance - 1f, 1f); // Empêcher la distance d'être négative
         }
     }
 
@@ -53,7 +55,8 @@ public class GrapplingHook : MonoBehaviour
     private void StartGrapple()
     {
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        RaycastHit2D hit = Physics2D.Raycast(firePoint.position, mousePosition - (Vector2)firePoint.position, Mathf.Infinity, grappleLayer);
+        Vector2 direction = (mousePosition - (Vector2)firePoint.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(firePoint.position, direction, maxGrappleDistance, grappleLayer);
 
         if (hit.collider != null)
         {
