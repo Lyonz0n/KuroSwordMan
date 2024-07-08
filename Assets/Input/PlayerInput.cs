@@ -71,6 +71,42 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""InvertGravity"",
+                    ""type"": ""Button"",
+                    ""id"": ""27c3f5f0-9755-4faa-803f-f223662ba253"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""GrappinUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""28d036c8-f351-4f6b-9737-c5f42e4e9a58"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""GrappinDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""d39f3674-08ca-475a-be5f-90533c573685"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Grappin"",
+                    ""type"": ""Button"",
+                    ""id"": ""f7444193-b64a-4da6-b261-1f2bcb1738ac"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -209,7 +245,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""05f6913d-c316-48b2-a6bb-e225f14c7960"",
-                    ""path"": ""<Mouse>/rightButton"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
@@ -269,6 +305,50 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""362bb6d4-33cb-40bf-a80f-8a9a2468188e"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""InvertGravity"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7c54cbcf-c531-4fb0-bd6f-6db92f8da003"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""GrappinUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""365fcee7-e6a2-4388-b879-3c73c010227f"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""GrappinDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2346eb88-1658-4140-8585-8fea9eaef5ec"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Grappin"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -861,6 +941,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_InvertGravity = m_Player.FindAction("InvertGravity", throwIfNotFound: true);
+        m_Player_GrappinUp = m_Player.FindAction("GrappinUp", throwIfNotFound: true);
+        m_Player_GrappinDown = m_Player.FindAction("GrappinDown", throwIfNotFound: true);
+        m_Player_Grappin = m_Player.FindAction("Grappin", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -939,6 +1023,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Fire;
     private readonly InputAction m_Player_Dash;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_InvertGravity;
+    private readonly InputAction m_Player_GrappinUp;
+    private readonly InputAction m_Player_GrappinDown;
+    private readonly InputAction m_Player_Grappin;
     public struct PlayerActions
     {
         private @PlayerInput m_Wrapper;
@@ -948,6 +1036,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
         public InputAction @Dash => m_Wrapper.m_Player_Dash;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @InvertGravity => m_Wrapper.m_Player_InvertGravity;
+        public InputAction @GrappinUp => m_Wrapper.m_Player_GrappinUp;
+        public InputAction @GrappinDown => m_Wrapper.m_Player_GrappinDown;
+        public InputAction @Grappin => m_Wrapper.m_Player_Grappin;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -972,6 +1064,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @InvertGravity.started += instance.OnInvertGravity;
+            @InvertGravity.performed += instance.OnInvertGravity;
+            @InvertGravity.canceled += instance.OnInvertGravity;
+            @GrappinUp.started += instance.OnGrappinUp;
+            @GrappinUp.performed += instance.OnGrappinUp;
+            @GrappinUp.canceled += instance.OnGrappinUp;
+            @GrappinDown.started += instance.OnGrappinDown;
+            @GrappinDown.performed += instance.OnGrappinDown;
+            @GrappinDown.canceled += instance.OnGrappinDown;
+            @Grappin.started += instance.OnGrappin;
+            @Grappin.performed += instance.OnGrappin;
+            @Grappin.canceled += instance.OnGrappin;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -991,6 +1095,18 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @InvertGravity.started -= instance.OnInvertGravity;
+            @InvertGravity.performed -= instance.OnInvertGravity;
+            @InvertGravity.canceled -= instance.OnInvertGravity;
+            @GrappinUp.started -= instance.OnGrappinUp;
+            @GrappinUp.performed -= instance.OnGrappinUp;
+            @GrappinUp.canceled -= instance.OnGrappinUp;
+            @GrappinDown.started -= instance.OnGrappinDown;
+            @GrappinDown.performed -= instance.OnGrappinDown;
+            @GrappinDown.canceled -= instance.OnGrappinDown;
+            @Grappin.started -= instance.OnGrappin;
+            @Grappin.performed -= instance.OnGrappin;
+            @Grappin.canceled -= instance.OnGrappin;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1178,6 +1294,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         void OnFire(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnInvertGravity(InputAction.CallbackContext context);
+        void OnGrappinUp(InputAction.CallbackContext context);
+        void OnGrappinDown(InputAction.CallbackContext context);
+        void OnGrappin(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

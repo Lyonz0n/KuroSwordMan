@@ -1,106 +1,111 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GrapplingHook : MonoBehaviour
 {
-    [SerializeField] private float grappleLength = 10f;
-    [SerializeField] private float attractionSpeed = 5f; // Vitesse d'attraction vers l'ancre
+    [SerializeField] private float grappleSpeed = 10f;
     [SerializeField] private LayerMask grappleLayer;
-    private Vector3 grapplePoint;
+    [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private float attractionSpeed = 5f;
+    [SerializeField] private float slackSpeed = 5f;
+    [SerializeField] private float maxGrappleDistance = 20f;
+
+    private Vector2 grapplePoint;
     private DistanceJoint2D joint;
-    private LineRenderer lineRenderer;
-    private GameObject grappleAnchor;
+    private bool isGrappling;
+    private bool isAttracting;
+    private bool isSlacking;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        joint = gameObject.GetComponent<DistanceJoint2D>();
+        joint = gameObject.AddComponent<DistanceJoint2D>();
         joint.enabled = false;
-
-        // Ajout d'un LineRenderer pour visualiser le grappin
-        lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.positionCount = 2;
-        lineRenderer.startWidth = 0.05f;
-        lineRenderer.endWidth = 0.05f;
         lineRenderer.enabled = false;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (isGrappling)
         {
-                RaycastHit2D hit = Physics2D.Raycast(
-                origin: Camera.main.ScreenToWorldPoint(Input.mousePosition),
-                direction: Vector2.zero,
-                distance: Mathf.Infinity,
-                layerMask: grappleLayer);
+            lineRenderer.SetPosition(0, firePoint.position);
+            lineRenderer.SetPosition(1, grapplePoint);
 
-            if (hit.collider != null)
+            if (isAttracting)
             {
-                grapplePoint = hit.point;
-                grapplePoint.z = 0;
-
-                // Créer un point d'ancrage pour le grappin
-                CreateGrappleAnchor(grapplePoint);
-
-                joint.connectedAnchor = grapplePoint;
-                joint.enabled = true;
-                joint.distance = grappleLength;
-
-                // Activer et définir les positions du LineRenderer
-                lineRenderer.enabled = true;
-                lineRenderer.SetPosition(0, transform.position);
-                lineRenderer.SetPosition(1, grapplePoint);
+                joint.distance = Mathf.Max(joint.distance - attractionSpeed * Time.deltaTime, 0f);
             }
-        }
 
-        if (Input.GetMouseButtonUp(0))
-        {
-            joint.enabled = false;
-            lineRenderer.enabled = false;
-
-            // Détruire le point d'ancrage du grappin
-            if (grappleAnchor != null)
+            if (isSlacking)
             {
-                Destroy(grappleAnchor);
-            }
-        }
-
-        // Mettre à jour la position de départ du LineRenderer
-        if (joint.enabled)
-        {
-            lineRenderer.SetPosition(0, transform.position);
-
-            // Vérifier si la touche d'attraction est enfoncée
-            if (Input.GetKey(KeyCode.E))
-            {
-                AttractToAnchor();
+                joint.distance = Mathf.Min(joint.distance + slackSpeed * Time.deltaTime, maxGrappleDistance);
             }
         }
     }
 
-    private void CreateGrappleAnchor(Vector3 anchorPosition)
+    public void OnGrapple(InputAction.CallbackContext context)
     {
-        if (grappleAnchor != null)
+        if (context.started)
         {
-            Destroy(grappleAnchor);
+            StartGrapple();
         }
-
-        grappleAnchor = new GameObject("GrappleAnchor");
-        grappleAnchor.transform.position = anchorPosition;
-        Rigidbody2D anchorRb = grappleAnchor.AddComponent<Rigidbody2D>();
-        anchorRb.bodyType = RigidbodyType2D.Dynamic;
-        anchorRb.gravityScale = 0f; // Vous pouvez ajuster la gravité si nécessaire
-
-        joint.connectedBody = anchorRb;
+        else if (context.canceled)
+        {
+            StopGrapple();
+        }
     }
 
-    private void AttractToAnchor()
+    public void OnGrappleUp(InputAction.CallbackContext context)
     {
-        Vector2 direction = (grapplePoint - transform.position).normalized;
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        rb.AddForce(direction * attractionSpeed, ForceMode2D.Force);
+        if (context.started)
+        {
+            isAttracting = true;
+        }
+        else if (context.canceled)
+        {
+            isAttracting = false;
+        }
+    }
+
+    public void OnGrappleDown(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            isSlacking = true;
+        }
+        else if (context.canceled)
+        {
+            isSlacking = false;
+        }
+    }
+
+    private void StartGrapple()
+    {
+        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector2 direction = mousePosition - (Vector2)firePoint.position;
+        RaycastHit2D hit = Physics2D.Raycast(firePoint.position, direction, maxGrappleDistance, grappleLayer);
+
+        if (hit.collider != null)
+        {
+            isGrappling = true;
+            grapplePoint = hit.point;
+            joint.connectedAnchor = grapplePoint;
+            joint.enabled = true;
+            joint.distance = Vector2.Distance(firePoint.position, grapplePoint);
+            joint.autoConfigureDistance = false;
+            joint.autoConfigureConnectedAnchor = false;
+
+            lineRenderer.enabled = true;
+        }
+    }
+
+    private void StopGrapple()
+    {
+        isGrappling = false;
+        isAttracting = false;
+        isSlacking = false;
+        joint.enabled = false;
+        lineRenderer.enabled = false;
     }
 }

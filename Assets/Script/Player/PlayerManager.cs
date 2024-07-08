@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,18 +8,18 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private Animator animator; // Référence à l'Animator
 
     [Header("Movement Setting")]
-    [SerializeField] private float speed = 5f;
-    [SerializeField] private float jumpForce = 10f; // Force du saut
+    [SerializeField] private float speed = 8f;
+    [SerializeField] private float jumpForce = 16f; // Force du saut
     [SerializeField] private float dashSpeed = 20f; // Vitesse du dash
     [SerializeField] private float dashDuration = 0.2f; // Durée du dash
     [SerializeField] private float groundDeceleration = 10f; // Décélération au sol
     [SerializeField] private float airDeceleration = 5f; // Décélération en l'air
     [SerializeField] private float acceleration = 10f; // Accélération
-    [SerializeField] private float wallJumpForce = 10f; // Force du wall jump
-    [SerializeField] private Vector2 wallJumpDirection = new Vector2(1, 1); // Direction du wall jump
+    [SerializeField] private float wallSlidingSpeed = 2f; // Vitesse de glissement sur le mur
+    [SerializeField] private Vector2 wallJumpingPower = new Vector2(8f, 16f); // Puissance du saut de mur
 
     [Header("Gravity Settings")]
-    [SerializeField] private float defaultGravityScale = 1f;
+    [SerializeField] public float defaultGravityScale = 1f;
     [SerializeField] private float fallAcceleration = 20f; // Accélération de la chute
     [SerializeField] private float maxFallSpeed = 40f; // Vitesse de chute maximale
     [SerializeField] private float jumpEndEarlyGravityModifier = 2f; // Modificateur de gravité lorsque le saut est terminé prématurément
@@ -31,6 +30,8 @@ public class PlayerManager : MonoBehaviour
 
     public Rigidbody2D rb;
     public LayerMask wallLayer; // Masque de couche pour détecter les murs
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private Transform wallCheck;
 
     private Vector2 movementInput;
     private Vector2 frameVelocity;
@@ -44,11 +45,18 @@ public class PlayerManager : MonoBehaviour
     private float lastGroundedTime; // Temps écoulé depuis que le joueur a quitté le sol
     private float lastJumpTime; // Temps écoulé depuis que le joueur a appuyé sur le bouton de saut
     private bool gravityInverted = false; // État de la gravité
-
+    private bool isWallSliding = false;
+    private bool isWallJumping = false;
+    private float wallJumpingDirection;
+    private float wallJumpingCounter;
+    private float wallJumpingTime = 0.2f;
+    private float wallJumpingDuration = 0.4f;
+    private GrapplingHook grapplingHook;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         playerTransform = transform; // Assurez-vous que le script est attaché au joueur
+        grapplingHook = GetComponent<GrapplingHook>();
     }
 
     private void Update()
@@ -78,16 +86,34 @@ public class PlayerManager : MonoBehaviour
         {
             Jump();
         }
+
+        WallSlide();
     }
 
     private void FixedUpdate()
     {
-        if (!isDashing) // Empêcher le mouvement normal pendant le dash
+        if (!isDashing && !isWallJumping) // Empêcher le mouvement normal pendant le dash
         {
             rb.velocity = new Vector2(frameVelocity.x, rb.velocity.y);
         }
 
         HandleGravity();
+    }
+
+    // Méthodes du système d'input
+    public void OnGrapple(InputAction.CallbackContext context)
+    {
+        grapplingHook.OnGrapple(context);
+    }
+
+    public void OnGrappleUp(InputAction.CallbackContext context)
+    {
+        grapplingHook.OnGrappleUp(context);
+    }
+
+    public void OnGrappleDown(InputAction.CallbackContext context)
+    {
+        grapplingHook.OnGrappleDown(context);
     }
 
     public void OnFire(InputAction.CallbackContext context)
@@ -122,7 +148,7 @@ public class PlayerManager : MonoBehaviour
             {
                 Jump();
             }
-            else if (isTouchingWall)
+            else if (isWallSliding)
             {
                 WallJump();
             }
@@ -153,13 +179,43 @@ public class PlayerManager : MonoBehaviour
 
     private void WallJump()
     {
-        // Appliquer une force pour le wall jump
-        Vector2 wallJumpVelocity = new Vector2(wallJumpDirection.x * wallJumpForce * -Mathf.Sign(movementInput.x), wallJumpDirection.y * wallJumpForce * (gravityInverted ? -1 : 1));
-        rb.velocity = new Vector2(wallJumpVelocity.x, 0); // Annuler la vélocité verticale actuelle
-        rb.AddForce(wallJumpVelocity, ForceMode2D.Impulse);
-        endedJumpEarly = false;
-        lastJumpTime = 0;
-        lastGroundedTime = 0;
+        if (isTouchingWall)
+        {
+            isWallJumping = true;
+            wallJumpingDirection = -transform.localScale.x;
+            wallJumpingCounter = wallJumpingTime;
+
+            Vector2 wallJumpVelocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y * (gravityInverted ? -1 : 1));
+            rb.velocity = new Vector2(wallJumpVelocity.x, 0); // Annuler la vélocité verticale actuelle
+            rb.AddForce(wallJumpVelocity, ForceMode2D.Impulse);
+
+            if (transform.localScale.x != wallJumpingDirection)
+            {
+                Vector3 localScale = transform.localScale;
+                localScale.x *= -1f;
+                transform.localScale = localScale;
+            }
+
+            Invoke(nameof(StopWallJumping), wallJumpingDuration);
+        }
+    }
+
+    private void StopWallJumping()
+    {
+        isWallJumping = false;
+    }
+
+    private void WallSlide()
+    {
+        if (isTouchingWall && !isGrounded && movementInput.x != 0f)
+        {
+            isWallSliding = true;
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
+        }
+        else
+        {
+            isWallSliding = false;
+        }
     }
 
     private IEnumerator Dash()
@@ -228,8 +284,8 @@ public class PlayerManager : MonoBehaviour
     private void CheckWallContact()
     {
         // Raycast pour détecter les murs à gauche et à droite
-        RaycastHit2D hitLeft = Physics2D.Raycast(transform.position, Vector2.left, 0.5f, wallLayer);
-        RaycastHit2D hitRight = Physics2D.Raycast(transform.position, Vector2.right, 0.5f, wallLayer);
+        RaycastHit2D hitLeft = Physics2D.Raycast(wallCheck.position, Vector2.left, 0.2f, wallLayer);
+        RaycastHit2D hitRight = Physics2D.Raycast(wallCheck.position, Vector2.right, 0.2f, wallLayer);
 
         isTouchingWall = hitLeft.collider != null || hitRight.collider != null;
     }
@@ -276,4 +332,6 @@ public class PlayerManager : MonoBehaviour
     {
         SetGravityScale(defaultGravityScale);
     }
+
+   
 }
