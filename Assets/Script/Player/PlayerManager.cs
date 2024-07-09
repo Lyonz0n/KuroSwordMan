@@ -12,11 +12,11 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private Sprite slideWallSprite; // Sprite pour le wall slide
 
     [Header("Movement Setting")]
-    [SerializeField] private float speed = 8f;
+    [SerializeField] private float groundSpeed = 8f;
+    [SerializeField] private float airSpeed = 5f;
+    [SerializeField] private float sprintSpeedMultiplier = 1.5f; // Multiplicateur de vitesse pour le sprint
     [SerializeField] private float jumpForce = 16f; // Force du saut
-    [SerializeField] private float dashSpeed = 20f; // Vitesse du dash
-    [SerializeField] private float dashDuration = 0.2f; // Durée du dash
-    [SerializeField] private float groundDeceleration = 10f; // Décélération au sol
+  
     [SerializeField] private float airDeceleration = 5f; // Décélération en l'air
     [SerializeField] private float acceleration = 10f; // Accélération
     [SerializeField] private float wallSlidingSpeed = 2f; // Vitesse de glissement sur le mur
@@ -42,12 +42,13 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private Transform wallCheck;
     public LayerMask wallLayer; // Masque de couche pour détecter les murs
     public Vector2 wallCheckSize = new Vector2(0.03f, 0.49f);
+
     private Vector2 movementInput;
     private Vector2 frameVelocity;
     private bool isJumping = false;
     private bool isGrounded = true; // Assurez-vous de mettre à jour cette variable en fonction de votre détection de sol
     private bool isTouchingWall = false; // Indique si le joueur touche un mur
-    private bool isDashing;
+    private bool isSprinting = false;
     private bool endedJumpEarly = false;
     private Transform playerTransform;
 
@@ -61,6 +62,7 @@ public class PlayerManager : MonoBehaviour
     private float wallJumpingTime = 0.2f;
     private float wallJumpingDuration = 0.4f;
     private GrapplingHook grapplingHook;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -110,7 +112,7 @@ public class PlayerManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isDashing && !isWallJumping) // Empêcher le mouvement normal pendant le dash
+        if (!isWallJumping) // Empêcher le mouvement normal pendant le dash
         {
             rb.velocity = new Vector2(frameVelocity.x, rb.velocity.y);
         }
@@ -148,11 +150,15 @@ public class PlayerManager : MonoBehaviour
         movementInput = context.ReadValue<Vector2>();
     }
 
-    public void OnDash(InputAction.CallbackContext context)
+    public void OnSprint(InputAction.CallbackContext context)
     {
-        if (context.started && !isDashing)
+        if (context.started && isGrounded)
         {
-            StartCoroutine(Dash());
+            isSprinting = true;
+        }
+        else if (context.canceled || !isGrounded)
+        {
+            isSprinting = false;
         }
     }
 
@@ -236,23 +242,6 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private IEnumerator Dash()
-    {
-        isDashing = true;
-        Vector2 dashDirection = movementInput.normalized;
-
-        // Activer l'animation de dash
-        animator.SetTrigger("Dash");
-
-        // Appliquer une vélocité constante pour le dash
-        rb.velocity = dashDirection * dashSpeed;
-
-        yield return new WaitForSeconds(dashDuration);
-
-        rb.velocity = Vector2.zero; // Arrêter le joueur après la durée du dash
-        isDashing = false;
-    }
-
     private void FlipSprite(float horizontalMovement)
     {
         Vector3 localScale = playerTransform.localScale;
@@ -288,24 +277,19 @@ public class PlayerManager : MonoBehaviour
 
     private void HandleDirection()
     {
-        if (movementInput.x == 0)
-        {
-            var deceleration = isGrounded ? groundDeceleration : airDeceleration;
-            frameVelocity.x = Mathf.MoveTowards(frameVelocity.x, 0, deceleration * Time.fixedDeltaTime);
-        }
-        else
-        {
-            frameVelocity.x = Mathf.MoveTowards(frameVelocity.x, movementInput.x * speed, acceleration * Time.fixedDeltaTime);
-        }
+        float currentSpeed = isGrounded ? groundSpeed : airSpeed;
+        float targetSpeed = movementInput.x * currentSpeed * (isSprinting ? sprintSpeedMultiplier : 1f);
+        float accelerationRate = isGrounded ? acceleration : airDeceleration;
+        frameVelocity.x = Mathf.MoveTowards(frameVelocity.x, targetSpeed, accelerationRate * Time.fixedDeltaTime);
     }
 
     private void CheckWallContact()
     {
         // Raycast pour détecter les murs à gauche et à droite
-        Collider2D hitLeft = Physics2D.OverlapBox(wallCheck.position, wallCheckSize, 0f, wallLayer);
-        Collider2D hitRight = Physics2D.OverlapBox(wallCheck.position, wallCheckSize, 0f, wallLayer);
+        RaycastHit2D hitLeft = Physics2D.Raycast(wallCheck.position, Vector2.left, 0.2f, wallLayer);
+        RaycastHit2D hitRight = Physics2D.Raycast(wallCheck.position, Vector2.right, 0.2f, wallLayer);
 
-        isTouchingWall = hitLeft != null || hitRight != null;
+        isTouchingWall = hitLeft.collider != null || hitRight.collider != null;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -317,11 +301,6 @@ public class PlayerManager : MonoBehaviour
             lastGroundedTime = coyoteTime; // Réinitialiser le coyote time lorsqu'on touche le sol
             isJumping = false; // Réinitialiser l'état de saut lorsqu'on touche le sol
         }
-
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            isTouchingWall = true;
-        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -330,11 +309,6 @@ public class PlayerManager : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
-        }
-
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            isTouchingWall = false;
         }
     }
 
@@ -356,6 +330,7 @@ public class PlayerManager : MonoBehaviour
     {
         rb.gravityScale = newGravityScale * (gravityInverted ? -1 : 1);
     }
+
     public void ResetGravityScale()
     {
         SetGravityScale(defaultGravityScale);
@@ -370,5 +345,4 @@ public class PlayerManager : MonoBehaviour
         Gizmos.color = Color.white;
         Gizmos.DrawWireCube(wallCheck.position, wallCheckSize);
     }
-
 }
