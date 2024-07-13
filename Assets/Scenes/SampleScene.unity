@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 95883282}
   - component: {fileID: 95883284}
   - component: {fileID: 95883285}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
